@@ -1,5 +1,6 @@
 # OSCP
 Walkthrough - TJ Null List
 
-Systems Compromised 
+Systems compromised till now
+
 Kioptrix Level 1
