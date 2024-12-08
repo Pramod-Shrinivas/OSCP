@@ -1,1 +1,94 @@
+I’m excited to announce that I’m starting my preparation for the OSCP examination! Having recently completed the Altered Security CRTP examination, which was an incredible experience, its motivated me to invest time into my studies. Starting with the very first machine “Kioptrix Level 1” from the well-known TJNULL list (“The secret recipe for OSCP Preparation”)
 
+Kioptrix Series on Vulnhub: Kioptrix consists of five machines, each with increasing difficulty. The challenges are somewhat outdated, yet seem pertinent.
+
+Let’s get started with the first box. I downloaded the .rar file, and spun up the Virtual Machine in Virtual Box. For the attacker machine, i will be using Kali Linux
+
+![]https://miro.medium.com/v2/resize:fit:720/format:webp/1*9c3jFN07WvV9xansTShnFg.png
+
+Scanning and Enumeration Phase:
+
+Attacker Machine: Kali Machine IP: 192.168.1.7
+
+
+Finding the Target IP Address (Kioptrix VM). The host grabs an address via DHCP as it boots. We can detect the IP Address either via netdiscover reconnaissance tool or any network scanner tools like Nmap to identify live hosts.
+
+Netdiscover Command:
+
+sudo netdiscover -i eth0 -r 192.168.1.0/24
+                  or
+nmap -T4 -sn 192.168.1.0/24
+
+Mac Vendor: “PCS Systemtechnik GmbH” belongs to VirtualBox. Here 192.168.1.8 belongs to our machine “Kioptrix Level 1”.
+
+Service Enumeration: Detailed scanning of the target with Nmap.
+
+sudo nmap -sV -sC -Pn -sS -A 192.168.1.8
+
+Interesting services worth exploring based on above scan results.
+
+Port 22 — Running OpenSSH 2.9p2.
+Port 80 — Running Apache Web server (1.3.20, Red-Hat/Linux; mod_ssl/2.8.4).
+Port 111 — Running RPC.
+Port 139 — Running Samba.
+Port 443 — Running Apache Web server (1.3.20, Red-Hat/Linux; mod_ssl/2.8.4).
+Port 1024 — Running RPC.
+Port 32768 — Unknown.
+Exploitation 1: Apache and mod_ssl
+
+Lets explore the application hosted.
+
+
+Ran Dirbuster to reveal any hidden directories. Nothing of interest except a standard apache installation.
+
+
+Ran Nikto against the web server to reveal any vulnerabilities. Nikto revealed a few outdated versions of software running including outdated mod_ssl version vulnerable to remote buffer overflow.
+
+
+Searching for Apache and mod_ssl vulnerabilities / exploits confirms the above.
+
+searchsploit apache mod_ssl
+
+Create a local copy of the exploit 47080.c as exploit.c. Tried to compile the exploit but failed.
+
+
+
+Found an interesting article by Paul Sec about updating this exploit. Validated the exploit as described. (Warnings can be ignored !)
+
+
+
+Launched the exploit successfully. Was able to login as root.
+
+
+Finally found the flag (or rather email from root) in var/mail/root.
+
+
+Exploitation 2: SMB Service
+
+Enumerating SMB identified from the nmap scans earlier (port 139) on our target machine. Scans show that null session is allowed on the host. (Anonymous Login)
+
+
+Enumerating SMB by connecting to the target machine (Anonymous Login) to list all the shares available.
+
+
+Let’s check if IPC$ and ADMIN$ shares can be accessed using smbclient.
+
+
+Admin shares are accessible. File listing and other permissions are denied. Lets identify the smbversion running on the target machine. Tried with the below but no success. Perhaps there is a different way to identify ? Was trying to avoid metasploit as such as possible !
+
+nmap -sV -p 139 192.168.1.8
+enum4linux -a 192.168.1.8
+smbmap -H 192.168.1.8
+Last resort -> Using auxiliary module in metasploit for smbversion enumeration :(
+
+
+Lets search for any exploits available using searchsploit. Remote Code Execution seems interesting. (Avoiding metasploit usage here!)
+
+
+Copying a local copy of the exploit, compiling and executing the exploit.
+
+
+Finally was successful in getting root access to the machine.
+
+
+Interesting caption observed. “JE MOET JE MUIL HOUWE” which means “YOU MUST SHUT YOUR MOUTH” and an reference to a famous neophyte song .
