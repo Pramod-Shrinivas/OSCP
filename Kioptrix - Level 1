@@ -4,7 +4,7 @@ Kioptrix Series on Vulnhub: Kioptrix consists of five machines, each with increa
 
 Let’s get started with the first box. I downloaded the .rar file, and spun up the Virtual Machine in Virtual Box. For the attacker machine, i will be using Kali Linux
 
-![]https://miro.medium.com/v2/resize:fit:720/format:webp/1*9c3jFN07WvV9xansTShnFg.png
+https://miro.medium.com/v2/resize:fit:720/format:webp/1*9c3jFN07WvV9xansTShnFg.png
 
 Scanning and Enumeration Phase:
 
